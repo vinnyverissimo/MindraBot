@@ -20,3 +20,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Sobrescreve o cacert.pem do certifi (opcional, mas recomendado)
 RUN cp /app/cacert.pem $(python -c "import certifi; print(certifi.where())")
+
+CMD ["python", "botTelegram.py"]
