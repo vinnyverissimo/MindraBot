@@ -1,0 +1,11 @@
+version: '3.3'
+services:
+  telegram:
+    build: .
+    image: mindrabot
+    container_name: mindrabot
+    env_file:
+      - .env
+    volumes:
+      - ./files:/app/files
+    command: python botTelegram.py

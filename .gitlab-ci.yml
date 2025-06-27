@@ -1,0 +1,29 @@
+image: docker:git
+
+before_script:
+  - git config --global http.sslVerify false
+
+variables:
+  GIT_SSL_NO_VERIFY: "1"  # Ignora verificação SSL para repositórios Git (aplicado globalmente)  
+
+stages:
+  - deploy
+  
+deploy:
+  stage: deploy
+  only:
+    - DEV # Executa este job apenas quando houver um push para a branch 'DEV'
+  script:
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+    - ssh $SERVER_USER@$SERVER_IP "
+        cd /home/svc_d1brsynchros2/Git/herbot &&
+        git pull https://${GITLAB_USER}:${GITLAB_TOKEN}@vusws1d1brgit01.hrbl.net/br-local-apps/herbot.git DEV &&
+        docker-compose down &&
+        docker-compose build &&
+        docker-compose up -d
+      "
